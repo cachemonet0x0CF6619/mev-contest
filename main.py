@@ -13,12 +13,10 @@ def convert_dataset(dataset):
         txData = ast.literal_eval(blob)
         examples.append([
             int(txData['from'], 0) % (2**30),
-            (int(txData['to'], 0) if txData['to'] is not None else 0) %
-            (2**30),
+            (int(txData['to'], 0) if txData['to'] is not None else 0) % (2**30),
             int(txData['gas'], 0),
             int(txData['gasPrice'], 0),
-            (int(txData['input'][:10], 0) if txData['input'] != '0x' else 0) %
-            (2**30),
+            (int(txData['input'][:10], 0) if txData['input'] != '0x' else 0) % (2**30),
             int(txData['nonce'], 0),
         ])
     return np.array(examples)
@@ -33,8 +31,12 @@ binaryModel.fit(convert_dataset(train), train['Label0'])
 binaryPredictions = binaryModel.predict_proba(testFeatures)[:, 1]
 
 regressionModel = xgb.XGBRegressor(n_estimators=50)
-regressionModel.fit(convert_dataset(train[train['Label0'] == True]),
-                    train[train['Label0'] == True]['Label1'])
+
+regressionModel.fit(
+    convert_dataset(train[train['Label0'] == True]),
+    train[train['Label0'] == True]['Label1']
+)
+
 regressionPredictions = regressionModel.predict(testFeatures)
 
 submission = csv.writer(open('submission.csv', 'w', encoding='UTF8'))
